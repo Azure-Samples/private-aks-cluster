@@ -18,7 +18,7 @@ products:
 - azure-key-vault
 - azure-log-analytics
 - azure-virtual-machines
-name: Create a private AKS cluster in a virtual network along with a jumpbox virtual machine.
+name: Create a private AKS cluster
 description: This sample shows how to create a private AKS cluster in a virtual network along with a jumpbox virtual machine.
 urlFragment: private-aks-cluster
 azureDeploy: "https://raw.githubusercontent.com/Azure-Samples/private-aks-cluster/main/templates/two-node-pools/azuredeploy.json"
