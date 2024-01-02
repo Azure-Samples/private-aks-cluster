@@ -17,7 +17,7 @@ aksResourceGroupName="${aksPrefix}RG"
 location="WestEurope"
 
 # Name and resource group name of the Azure Container Registry used by the AKS cluster.
-# The name of the cluster is also used to create or select an existing admin group in the Azure AD tenant.
+# The name of the cluster is also used to create or select an existing admin group in the Microsoft Entra ID tenant.
 acrName="${aksPrefix}Acr"
 acrResourceGroupName="$aksResourceGroupName"
 acrSku="Standard"
@@ -251,17 +251,17 @@ else
 fi
 
 # Get the user principal name of the current user
-echo "Retrieving the user principal name of the current user from the [$tenantId] Azure AD tenant..."
+echo "Retrieving the user principal name of the current user from the [$tenantId] Microsoft Entra ID tenant..."
 userPrincipalName=$(az account show --query user.name --output tsv)
 if [[ -n $userPrincipalName ]]; then
-    echo "[$userPrincipalName] user principal name successfully retrieved from the [$tenantId] Azure AD tenant"
+    echo "[$userPrincipalName] user principal name successfully retrieved from the [$tenantId] Microsoft Entra ID tenant"
 else
-    echo "Failed to retrieve the user principal name of the current user from the [$tenantId] Azure AD tenant"
+    echo "Failed to retrieve the user principal name of the current user from the [$tenantId] Microsoft Entra ID tenant"
     exit
 fi
 
-# Retrieve the objectId of the user in the Azure AD tenant used by AKS for user authentication
-echo "Retrieving the objectId of the [$userPrincipalName] user principal name from the [$tenantId] Azure AD tenant..."
+# Retrieve the objectId of the user in the Microsoft Entra ID tenant used by AKS for user authentication
+echo "Retrieving the objectId of the [$userPrincipalName] user principal name from the [$tenantId] Microsoft Entra ID tenant..."
 userObjectId=$(az ad user show --upn-or-object-id $userPrincipalName --query objectId --output tsv 2>/dev/null)
 
 if [[ -n $userObjectId ]]; then
@@ -286,30 +286,30 @@ else
     exit
 fi
 
-# Assign Azure Kubernetes Service RBAC Admin role to the current user
-echo "Checking if [$userPrincipalName] user has been assigned to [Azure Kubernetes Service RBAC Admin] role on the [$aksName] AKS cluster..."
+# Assign Azure Kubernetes Service RBAC Cluster Admin role to the current user
+echo "Checking if [$userPrincipalName] user has been assigned to [Azure Kubernetes Service RBAC Cluster Admin] role on the [$aksName] AKS cluster..."
 role=$(az role assignment list \
     --assignee $userObjectId \
     --scope $aksClusterId \
     --query [?roleDefinitionName].roleDefinitionName \
     --output tsv 2>/dev/null)
 
-if [[ $role == "Owner" ]] || [[ $role == "Contributor" ]] || [[ $role == "Azure Kubernetes Service RBAC Admin" ]]; then
+if [[ $role == "Owner" ]] || [[ $role == "Contributor" ]] || [[ $role == "Azure Kubernetes Service RBAC Cluster Admin" ]]; then
     echo "[$userPrincipalName] user is already assigned to the [$role] role on the [$aksName] AKS cluster"
 else
-    echo "[$userPrincipalName] user is not assigned to the [Azure Kubernetes Service RBAC Admin] role on the [$aksName] AKS cluster"
-    echo "Assigning the [$userPrincipalName] user to the [Azure Kubernetes Service RBAC Admin] role on the [$aksName] AKS cluster..."
+    echo "[$userPrincipalName] user is not assigned to the [Azure Kubernetes Service RBAC Cluster Admin] role on the [$aksName] AKS cluster"
+    echo "Assigning the [$userPrincipalName] user to the [Azure Kubernetes Service RBAC Cluster Admin] role on the [$aksName] AKS cluster..."
 
     az role assignment create \
-        --role "Azure Kubernetes Service RBAC Admin" \
+        --role "Azure Kubernetes Service RBAC Cluster Admin" \
         --assignee $userObjectId \
         --scope $aksClusterId \
         --only-show-errors 1>/dev/null
 
     if [[ $? == 0 ]]; then
-        echo "[$userPrincipalName] user successfully assigned to the [Azure Kubernetes Service RBAC Admin] role on the [$aksName] AKS cluster"
+        echo "[$userPrincipalName] user successfully assigned to the [Azure Kubernetes Service RBAC Cluster Admin] role on the [$aksName] AKS cluster"
     else
-        echo "Failed to assign the [$userPrincipalName] user to the [Azure Kubernetes Service RBAC Admin] role on the [$aksName] AKS cluster"
+        echo "Failed to assign the [$userPrincipalName] user to the [Azure Kubernetes Service RBAC Cluster Admin] role on the [$aksName] AKS cluster"
         exit
     fi
 fi
